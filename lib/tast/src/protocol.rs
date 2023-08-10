@@ -23,7 +23,7 @@ bitflags! {
 
 pub type TimedEvent = (Event, EventTime);
 
-#[derive(Default, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone, PartialEq)]
 pub struct EventChord {
     pub start_at: EventTime,
     pub end_at: EventTime,
