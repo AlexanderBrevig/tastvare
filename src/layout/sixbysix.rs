@@ -1,16 +1,16 @@
 use rp2040_hal::gpio::{PinId, PullUpInput};
 
-use super::{Layout, StatefulGpio};
-use crate::protocol::{Event, TimedEvent};
+use tast::{
+    layout::{
+        sixbysix::event_from,
+        sixbysix::{INDEX, MIDDLE, PINKY, RING, THUMB1, THUMB2},
+        Layout,
+    },
+    protocol::TimedEvent,
+};
 
+use super::StatefulGpio;
 pub mod tinykeys;
-
-const THUMB2: u8 = Event::ID5.bits();
-const THUMB1: u8 = Event::ID4.bits();
-const INDEX: u8 = Event::ID3.bits();
-const MIDDLE: u8 = Event::ID2.bits();
-const RING: u8 = Event::ID1.bits();
-const PINKY: u8 = Event::ID0.bits();
 
 pub struct SixBySix<P, R, M, I, T1, T2>
 where
@@ -27,14 +27,6 @@ where
     index: StatefulGpio<I, PullUpInput>,
     thumb1: StatefulGpio<T1, PullUpInput>,
     thumb2: StatefulGpio<T2, PullUpInput>,
-}
-
-fn event_from(mask: u8, pressed: bool) -> Option<Event> {
-    let mut event = Event::from_bits(mask)?;
-    if pressed {
-        event |= Event::PRESSED;
-    }
-    Some(event)
 }
 
 impl<P, R, M, I, T1, T2> Layout for SixBySix<P, R, M, I, T1, T2>

@@ -1,7 +1,7 @@
 use cortex_m::prelude::_embedded_hal_serial_Read;
 use rp2040_hal::uart::{Reader, UartDevice, ValidUartPinout, Writer};
 
-use crate::protocol::{Event, TimedEvent};
+use tast::protocol::{Event, TimedEvent};
 
 pub struct Serial<'a, U, TX, RX>
 where

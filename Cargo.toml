@@ -1,3 +1,6 @@
+[workspace]
+members = ["lib/*"]
+
 [package]
 edition = "2021"
 name = "tastvare"
@@ -34,6 +37,12 @@ smart-leds = "0.3.0"
 ws2812-pio = "0.6.0"
 bitflags = "2.3.3"
 frunk = { version = "0.4.2", default-features = false }
+
+[dependencies.tast]
+version = "0.1.0"
+path = "lib/tast"
+features = ["left"]
+
 # cargo build/run
 [profile.dev]
 codegen-units = 1

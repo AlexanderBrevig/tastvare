@@ -9,7 +9,7 @@ pub struct Engine {
 impl Engine {
     //handle events, TODO on the form [{start_at, end_at},...] the index is the id
     //allow for hold semantics and order of operation if important for chords
-    pub(crate) fn handle(&mut self, event: TimedEvent) -> Option<Events> {
+    pub fn handle(&mut self, event: TimedEvent) -> Option<Events> {
         let mut chords = [EventChord::default(); 64];
         if event.0.contains(Event::IMMEDIATE) {
             // IMMEDIATE events are not journaled to the event_log
@@ -48,7 +48,7 @@ impl Engine {
         }
     }
 
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             current_ix: 0,
             event_log: [(Event::NONE, 0); 64],
@@ -59,5 +59,14 @@ impl Engine {
 impl Default for Engine {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        assert_eq!(result, 4);
     }
 }

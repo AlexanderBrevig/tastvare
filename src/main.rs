@@ -9,11 +9,8 @@ compile_error!("Cannot be both left and right");
 #[cfg(not(any(feature = "left", feature = "right")))]
 compile_error!("Must be either left or right");
 
-mod engine;
-mod keymap;
 mod layout;
 mod light;
-mod protocol;
 mod serial;
 mod usb;
 
@@ -35,6 +32,7 @@ use rp2040_hal::{
     watchdog::Watchdog,
     Clock, Sio,
 };
+use tast::keymap::tinykeys::Tinykeys;
 use usb_device::class_prelude::UsbBusAllocator;
 use usb_device::prelude::UsbDeviceBuilder;
 use usb_device::prelude::UsbVidPid;
@@ -43,10 +41,10 @@ use usbd_human_interface_device::usb_class::UsbHidClassBuilder;
 
 // USB
 
-use crate::engine::Engine;
-use crate::keymap::Keymap;
-use crate::layout::Layout;
 use crate::usb::Usb;
+use tast::engine::Engine;
+use tast::keymap::Keymap;
+use tast::layout::Layout;
 
 const XOSC_CRYSTAL_FREQ: u32 = 12_000_000; // Typically found in BSP crates
 
@@ -90,7 +88,7 @@ fn main() -> ! {
 
     // Top down design
     let mut engine = Engine::new();
-    let keymap = keymap::tinykeys::Tinykeys {};
+    let keymap = Tinykeys {};
 
     #[cfg(feature = "left")]
     let mut layout = layout::sixbysix::tinykeys::left(

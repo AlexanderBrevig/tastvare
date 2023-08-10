@@ -1,0 +1,16 @@
+[package]
+edition = "2021"
+name = "tast"
+version = "0.1.0"
+description = "Testable components for tastvare"
+license = "MIT"
+
+[lib]
+
+[features]
+default = ["left"]
+left = []
+
+[dependencies]
+usbd-human-interface-device = "0.4.3"
+bitflags = "2.3.3"

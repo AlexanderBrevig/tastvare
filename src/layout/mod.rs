@@ -1,13 +1,10 @@
-use crate::protocol::{Event, EventTime};
 use core::convert::Infallible;
 use embedded_hal::digital::v2::InputPin;
 use rp2040_hal::gpio::{Pin, PinId, PinMode, PullUpInput, ValidPinMode};
+use tast::protocol::EventTime;
 
 pub mod sixbysix;
 pub mod thirtyfour;
-
-#[derive(Debug, Clone)]
-pub(crate) struct LayoutError;
 
 pub struct StatefulGpio<I, M>
 where
@@ -43,8 +40,4 @@ where
             Ok(false)
         }
     }
-}
-
-pub(crate) trait Layout {
-    fn get_event(&mut self) -> Option<(Event, EventTime)>;
 }
