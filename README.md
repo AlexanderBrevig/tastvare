@@ -19,6 +19,12 @@ flowchart TD
     keymap_generate_report --> |translates incoming events to actual scan codes| usb_write_report(usb::write_report)
 ```
 
+## Testing
+
+```bash
+cargo test_pc --package tast
+```
+
 ## TODO
 
 - [ ] Write tests that run on machine and later on hardware
