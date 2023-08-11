@@ -69,10 +69,8 @@ impl Default for Engine {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        engine::Engine,
-        protocol::{Event, EventChord},
-    };
+    use super::*;
+    use crate::protocol::{Event, EventChord};
 
     #[test]
     fn handle_none_first() {
