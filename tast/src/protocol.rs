@@ -31,3 +31,18 @@ pub struct EventChord {
 
 // We have 6 ID slots and thus support a max of 2⁶ = 64 unique key IDs
 pub type Events = [EventChord; 64];
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn sanity_check_event_api() {
+        let id0_id1 = Event::ID0 | Event::ID1;
+        assert!(id0_id1.contains(Event::ID0), "0 | 1 should have 0");
+        assert!(id0_id1.contains(Event::ID1), "0 | 1 should have 1");
+        let pressed_id0_id1 = Event::PRESSED | id0_id1;
+        assert!(pressed_id0_id1.contains(Event::PRESSED), "Pressed");
+        assert!(pressed_id0_id1.intersection(Event::ID_MASK) == id0_id1, "&");
+        assert!(pressed_id0_id1.bits() == 0b01000011, "bits");
+    }
+}

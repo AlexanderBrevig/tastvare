@@ -43,8 +43,6 @@ use usbd_human_interface_device::usb_class::UsbHidClassBuilder;
 
 use crate::usb::Usb;
 use tast::engine::Engine;
-use tast::keymap::Keymap;
-use tast::layout::Layout;
 
 const XOSC_CRYSTAL_FREQ: u32 = 12_000_000; // Typically found in BSP crates
 
@@ -87,11 +85,10 @@ fn main() -> ! {
     );
 
     // Top down design
-    let mut engine = Engine::new();
     let keymap = Tinykeys {};
 
     #[cfg(feature = "left")]
-    let mut layout = layout::sixbysix::tinykeys::left(
+    let layout = layout::sixbysix::tinykeys::left(
         pins.gpio5.into_pull_up_input(),
         pins.gpio6.into_pull_up_input(),
         pins.gpio7.into_pull_up_input(),
@@ -101,7 +98,7 @@ fn main() -> ! {
     );
 
     #[cfg(feature = "right")]
-    let mut layout = layout::sixbysix::tinykeys::right(
+    let layout = layout::sixbysix::tinykeys::right(
         pins.gpio5.into_pull_up_input(),
         pins.gpio6.into_pull_up_input(),
         pins.gpio7.into_pull_up_input(),
@@ -128,7 +125,7 @@ fn main() -> ! {
         .product("NKRO Keyboard")
         .serial_number("TEST")
         .build();
-    let mut usb = Usb {
+    let usb = Usb {
         usb_bus: &usb_bus,
         keyboard: &mut keyboard,
         usb_dev: &mut usb_dev,
@@ -141,24 +138,12 @@ fn main() -> ! {
         )
         .unwrap();
     let (mut rx, tx) = uart.split();
-    let mut serial = Serial {
+    let serial = Serial {
         tx: &tx,
         rx: &mut rx,
     };
 
-    //TODO: place in a Tastvare::App
-    while let Some(timed_event) = serial.get_event() {
-        let event = engine.handle(timed_event);
-        let report = keymap.generate_report(event);
-        usb.write_report(report).ok();
-    }
-
-    while let Some(timed_event) = layout.get_event() {
-        serial.send_event(timed_event.0);
-        let event = engine.handle(timed_event);
-        let report = keymap.generate_report(event);
-        usb.write_report(report).ok();
-    }
+    let mut engine = Engine::new(layout, keymap, usb, serial);
 
     // MAIN LOOP
     let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS); //, &clocks);
@@ -168,7 +153,7 @@ fn main() -> ! {
     loop {
         // tick once per ms/at 1kHz
         if tick_timer.wait().is_ok() {
-            usb.tick().ok();
+            engine.process();
             //TODO: move to keyboard module and update module from here
             ms += 1;
             if ms >= 1000 {
@@ -178,7 +163,7 @@ fn main() -> ! {
             // or use RTIC?
         }
 
-        usb.poll();
+        engine.poll();
 
         // let delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
         // info!("on!"); led_pin.set_high().unwrap(); delay.delay_ms(500);

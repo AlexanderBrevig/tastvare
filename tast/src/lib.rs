@@ -6,3 +6,5 @@ pub mod engine;
 pub mod keymap;
 pub mod layout;
 pub mod protocol;
+pub mod report;
+pub mod serial;
