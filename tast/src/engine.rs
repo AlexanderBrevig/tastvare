@@ -116,18 +116,20 @@ mod tests {
         keymap::tests::TestKeymap,
         layout::tests::TestLayout,
         protocol::{Event, EventChord},
+        report::tests::TestUsbReporter,
         serial::tests::TestEventSource,
     };
     fn engine(
         event: Option<TimedEvent>,
         events: Option<[Keyboard; 64]>,
-    ) -> Engine<64, TestLayout, TestKeymap, TestEventSource> {
+    ) -> Engine<64, TestLayout, TestKeymap, TestUsbReporter, TestEventSource> {
         Engine {
             event_log: [(Event::NONE, 0); 64],
             current_ix: 0,
             layout: TestLayout { event },
             keymap: TestKeymap { events },
             serial: TestEventSource { event },
+            report: TestUsbReporter {},
         }
     }
     #[test]
