@@ -18,9 +18,9 @@ pub mod tests {
     impl Keymap<64> for TestKeymap {
         fn generate_report(
             &self,
-            events: Option<crate::protocol::Events>,
+            _events: Option<crate::protocol::Events>,
         ) -> Option<[usbd_human_interface_device::page::Keyboard; 64]> {
-            None
+            self.events
         }
     }
 }

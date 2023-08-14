@@ -113,11 +113,8 @@ mod tests {
 
     use super::*;
     use crate::{
-        keymap::tests::TestKeymap,
-        layout::tests::TestLayout,
-        protocol::{Event, EventChord},
-        report::tests::TestUsbReporter,
-        serial::tests::TestEventSource,
+        keymap::tests::TestKeymap, layout::tests::TestLayout, protocol::Event,
+        report::tests::TestUsbReporter, serial::tests::TestEventSource,
     };
     fn engine(
         event: Option<TimedEvent>,
@@ -129,85 +126,88 @@ mod tests {
             layout: TestLayout { event },
             keymap: TestKeymap { events },
             serial: TestEventSource { event },
-            report: TestUsbReporter {},
+            report: TestUsbReporter { result: Ok(()) },
         }
     }
-    #[test]
-    fn handle_none_first() {
-        let mut engine = engine(None, None);
-        assert_eq!(
-            engine.process_timed_event((Event::PRESSED | Event::ID0, 10)),
-            None,
-            "engine.process_timed_event is None until balanced",
-        );
-    }
-    #[test]
-    fn handle_none_unbalanced() {
-        let mut engine = engine(None, None);
-        assert_eq!(
-            engine.process_timed_event((Event::PRESSED | Event::ID0, 10)),
-            None,
-            "engine.process_timed_event is None until balanced",
-        );
-        assert_eq!(
-            engine.process_timed_event((Event::PRESSED | Event::ID1, 10)),
-            None,
-            "engine.process_timed_event is None until balanced",
-        );
-        assert_eq!(
-            engine.process_timed_event((Event::PRESSED | Event::ID2, 10)),
-            None,
-            "engine.process_timed_event is None until balanced",
-        );
-    }
-    #[test]
-    fn handle_press() {
-        let mut engine = engine(None, None);
-        assert_eq!(
-            engine.process_timed_event((Event::PRESSED | Event::ID0, 10)),
-            None,
-            "engine.process_timed_event is None until balanced",
-        );
-        let events = engine.process_timed_event((Event::ID0, 12));
+    mod process_timed_event {
+        use crate::protocol::{Event, EventChord};
 
-        assert_eq!(
-            events.unwrap()[Event::ID0.bits() as usize],
-            EventChord {
-                start_at: 10,
-                end_at: 12
-            }
-        );
-    }
+        #[test]
+        fn process_te_none_first() {
+            let mut engine = super::engine(None, None);
+            assert_eq!(
+                engine.process_timed_event((Event::PRESSED | Event::ID0, 10)),
+                None,
+                "engine.process_timed_event is None until balanced",
+            );
+        }
+        #[test]
+        fn process_te_none_unbalanced() {
+            let mut engine = super::engine(None, None);
+            assert_eq!(
+                engine.process_timed_event((Event::PRESSED | Event::ID0, 10)),
+                None,
+                "engine.process_timed_event is None until balanced",
+            );
+            assert_eq!(
+                engine.process_timed_event((Event::PRESSED | Event::ID1, 10)),
+                None,
+                "engine.process_timed_event is None until balanced",
+            );
+            assert_eq!(
+                engine.process_timed_event((Event::PRESSED | Event::ID2, 10)),
+                None,
+                "engine.process_timed_event is None until balanced",
+            );
+        }
+        #[test]
+        fn process_te_press() {
+            let mut engine = super::engine(None, None);
+            assert_eq!(
+                engine.process_timed_event((Event::PRESSED | Event::ID0, 10)),
+                None,
+                "engine.process_timed_event is None until balanced",
+            );
+            let events = engine.process_timed_event((Event::ID0, 12));
 
-    #[test]
-    fn handle_two_chord() {
-        let mut engine = engine(None, None);
-        assert_eq!(
-            engine.process_timed_event((Event::PRESSED | Event::ID0, 10)),
-            None
-        );
-        assert_eq!(
-            engine.process_timed_event((Event::PRESSED | Event::ID1, 11)),
-            None
-        );
-        assert_eq!(engine.process_timed_event((Event::ID0, 12)), None);
-        let events = engine.process_timed_event((Event::ID1, 14));
-        /// NO MORE ERRORS WOHOOO
-        assert_eq!(
-            events.unwrap()[Event::ID0.bits() as usize],
-            EventChord {
-                start_at: 10,
-                end_at: 12
-            },
-            "ID 0"
-        );
-        assert_eq!(
-            events.unwrap()[Event::ID1.bits() as usize],
-            EventChord {
-                start_at: 11,
-                end_at: 14
-            },
-            "ID 0"
-        );
+            assert_eq!(
+                events.unwrap()[Event::ID0.bits() as usize],
+                EventChord {
+                    start_at: 10,
+                    end_at: 12
+                }
+            );
+        }
+
+        #[test]
+        fn process_te_two_chord() {
+            let mut engine = super::engine(None, None);
+            assert_eq!(
+                engine.process_timed_event((Event::PRESSED | Event::ID0, 10)),
+                None
+            );
+            assert_eq!(
+                engine.process_timed_event((Event::PRESSED | Event::ID1, 11)),
+                None
+            );
+            assert_eq!(engine.process_timed_event((Event::ID0, 12)), None);
+            let events = engine.process_timed_event((Event::ID1, 14));
+            assert_eq!(
+                events.unwrap()[Event::ID0.bits() as usize],
+                EventChord {
+                    start_at: 10,
+                    end_at: 12
+                },
+                "ID 0"
+            );
+            assert_eq!(
+                events.unwrap()[Event::ID1.bits() as usize],
+                EventChord {
+                    start_at: 11,
+                    end_at: 14
+                },
+                "ID 0"
+            );
+        }
     }
 }
