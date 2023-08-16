@@ -88,7 +88,7 @@ fn main() -> ! {
     let keymap = Tinykeys {};
 
     #[cfg(feature = "left")]
-    let layout = layout::sixbysix::tinykeys::left(
+    let layout = layout::twelve::tinykeys::left(
         pins.gpio5.into_pull_up_input(),
         pins.gpio6.into_pull_up_input(),
         pins.gpio7.into_pull_up_input(),
@@ -98,7 +98,7 @@ fn main() -> ! {
     );
 
     #[cfg(feature = "right")]
-    let layout = layout::sixbysix::tinykeys::right(
+    let layout = layout::twelve::tinykeys::right(
         pins.gpio5.into_pull_up_input(),
         pins.gpio6.into_pull_up_input(),
         pins.gpio7.into_pull_up_input(),

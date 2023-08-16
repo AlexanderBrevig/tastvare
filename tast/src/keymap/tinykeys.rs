@@ -57,7 +57,7 @@ mod tests {
             // };
             events.press(Event::ID1).release(Event::ID1);
             assert_eq!(
-                events.events[2],
+                events.events[Event::ID1.bits() as usize],
                 EventChord {
                     start_at: 10,
                     end_at: 20

@@ -3,7 +3,7 @@ use rp2040_hal::gpio::{
     Pin, PullUpInput,
 };
 
-use super::SixBySix;
+use super::Twelve;
 use crate::layout::StatefulGpio;
 
 //TODO: consider moving the key map to a config file
@@ -42,8 +42,8 @@ pub(crate) fn left(
     index: Pin<LI, PullUpInput>,
     thumb1: Pin<LT1, PullUpInput>,
     thumb2: Pin<LT2, PullUpInput>,
-) -> SixBySix<LP, LR, LM, LI, LT1, LT2> {
-    SixBySix::<LP, LR, LM, LI, LT1, LT2> {
+) -> Twelve<LP, LR, LM, LI, LT1, LT2> {
+    Twelve::<LP, LR, LM, LI, LT1, LT2> {
         pinky: StatefulGpio::new(pinky),
         ring: StatefulGpio::new(ring),
         middle: StatefulGpio::new(middle),
@@ -61,8 +61,8 @@ pub(crate) fn right(
     index: Pin<RI, PullUpInput>,
     thumb1: Pin<RT1, PullUpInput>,
     thumb2: Pin<RT2, PullUpInput>,
-) -> SixBySix<RP, RR, RM, RI, RT1, RT2> {
-    SixBySix::<RP, RR, RM, RI, RT1, RT2> {
+) -> Twelve<RP, RR, RM, RI, RT1, RT2> {
+    Twelve::<RP, RR, RM, RI, RT1, RT2> {
         pinky: StatefulGpio::new(pinky),
         ring: StatefulGpio::new(ring),
         middle: StatefulGpio::new(middle),

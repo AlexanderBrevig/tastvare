@@ -2,8 +2,8 @@ use rp2040_hal::gpio::{PinId, PullUpInput};
 
 use tast::{
     layout::{
-        sixbysix::event_from,
-        sixbysix::{INDEX, MIDDLE, PINKY, RING, THUMB1, THUMB2},
+        twelve::event_from,
+        twelve::{INDEX, MIDDLE, PINKY, RING, THUMB1, THUMB2},
         Layout,
     },
     protocol::TimedEvent,
@@ -12,7 +12,7 @@ use tast::{
 use super::StatefulGpio;
 pub mod tinykeys;
 
-pub struct SixBySix<P, R, M, I, T1, T2>
+pub struct Twelve<P, R, M, I, T1, T2>
 where
     P: PinId,
     R: PinId,
@@ -29,7 +29,7 @@ where
     thumb2: StatefulGpio<T2, PullUpInput>,
 }
 
-impl<P, R, M, I, T1, T2> Layout for SixBySix<P, R, M, I, T1, T2>
+impl<P, R, M, I, T1, T2> Layout for Twelve<P, R, M, I, T1, T2>
 where
     P: PinId,
     R: PinId,

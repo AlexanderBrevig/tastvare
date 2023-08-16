@@ -1,6 +1,8 @@
 use crate::protocol::TimedEvent;
 
-pub mod sixbysix;
+pub mod six;
+pub mod thirtyfour;
+pub mod twelve;
 
 #[derive(Debug, Clone)]
 pub struct LayoutError;
