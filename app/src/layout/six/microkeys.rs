@@ -1,5 +1,5 @@
 use rp2040_hal::gpio::{
-    bank0::{Gpio10, Gpio5, Gpio6, Gpio7, Gpio8, Gpio9},
+    bank0::{Gpio18, Gpio19, Gpio20, Gpio5, Gpio6, Gpio7},
     Pin, PullUpInput,
 };
 
@@ -8,42 +8,34 @@ use crate::layout::StatefulGpio;
 
 //TODO: consider moving the key map to a config file
 
-#[cfg(feature = "left")]
-type LR = Gpio5;
-#[cfg(feature = "left")]
-type LM = Gpio6;
-#[cfg(feature = "left")]
-type LI = Gpio7;
+#[allow(unused)]
+type LS = Gpio5;
+#[allow(unused)]
+type LL = Gpio6;
+#[allow(unused)]
+type LR = Gpio7;
+#[allow(unused)]
+type RL = Gpio18;
+#[allow(unused)]
+type RR = Gpio19;
+#[allow(unused)]
+type RS = Gpio20;
 
-#[cfg(feature = "right")]
-type RR = Gpio20;
-#[cfg(feature = "right")]
-type RM = Gpio19;
-#[cfg(feature = "right")]
-type RI = Gpio18;
-
-#[cfg(feature = "left")]
-pub(crate) fn left(
-    ring: Pin<LR, PullUpInput>,
-    middle: Pin<LM, PullUpInput>,
-    index: Pin<LI, PullUpInput>,
-) -> Twelve<LR, LM, LI> {
-    Twelve::<LR, LM, LI> {
-        ring: StatefulGpio::new(ring),
-        middle: StatefulGpio::new(middle),
-        index: StatefulGpio::new(index),
-    }
-}
-
-#[cfg(feature = "right")]
-pub(crate) fn right(
-    ring: Pin<RR, PullUpInput>,
-    middle: Pin<RM, PullUpInput>,
-    index: Pin<RI, PullUpInput>,
-) -> Twelve<LR, LM, LI> {
-    Twelve::<LR, LM, LI> {
-        ring: StatefulGpio::new(ring),
-        middle: StatefulGpio::new(middle),
-        index: StatefulGpio::new(index),
+#[allow(unused)]
+pub(crate) fn microkeys(
+    lshift: Pin<LS, PullUpInput>,
+    lleft: Pin<LL, PullUpInput>,
+    lright: Pin<LR, PullUpInput>,
+    rleft: Pin<RL, PullUpInput>,
+    rright: Pin<RR, PullUpInput>,
+    rshift: Pin<RS, PullUpInput>,
+) -> Six<LS, LL, LR, RL, RR, RS> {
+    Six::<LS, LL, LR, RL, RR, RS> {
+        lshift: StatefulGpio::new(lshift),
+        lleft: StatefulGpio::new(lleft),
+        lright: StatefulGpio::new(lright),
+        rleft: StatefulGpio::new(rleft),
+        rright: StatefulGpio::new(rright),
+        rshift: StatefulGpio::new(rshift),
     }
 }

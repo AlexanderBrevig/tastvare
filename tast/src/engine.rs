@@ -1,7 +1,7 @@
 use crate::{
     keymap::Keymap,
     layout::Layout,
-    protocol::{Event, EventChord, EventTime, Events, TimedEvent, EVENTS_LEN},
+    protocol::{self, Event, EventChord, EventTime, Events, TimedEvent, EVENTS_LEN},
     report::UsbReporter,
     serial::EventSource,
 };
@@ -55,10 +55,10 @@ where
         if event.0.contains(Event::IMMEDIATE) {
             // IMMEDIATE events are not journaled to the event_log
             let ix = (event.0 & Event::ID_MASK).bits() as usize;
-            let mut chords = [EventChord::default(); EVENTS_LEN];
-            chords[ix].start_at = event.1;
-            chords[ix].end_at = event.1;
-            Some(chords)
+            let mut chord = [EventChord::default(); EVENTS_LEN];
+            chord[ix].start_at = event.1;
+            chord[ix].end_at = event.1;
+            Some(protocol::Events { chord })
         } else {
             // Register event to log
             self.event_log[self.current_ix] = event;
@@ -78,17 +78,16 @@ where
             }
 
             if presses <= 0 {
-                let mut chords = [EventChord::default(); EVENTS_LEN];
+                let mut chord = [EventChord::default(); EVENTS_LEN];
                 for (evnt, time) in self.event_log {
                     let ix = (evnt & Event::ID_MASK).bits() as usize;
                     if evnt.contains(Event::PRESSED) {
-                        //TODO: do not overwrite?
-                        chords[ix].start_at = time;
+                        chord[ix].start_at = time;
                     } else {
-                        chords[ix].end_at = time;
+                        chord[ix].end_at = time;
                     }
                 }
-                Some(chords)
+                Some(protocol::Events { chord })
             } else {
                 None
             }
@@ -171,7 +170,7 @@ mod tests {
             let events = engine.process_timed_event((Event::ID0, 12));
 
             assert_eq!(
-                events.unwrap()[Event::ID0.bits() as usize],
+                events.unwrap().chord[Event::ID0.bits() as usize],
                 EventChord {
                     start_at: 10,
                     end_at: 12
@@ -191,9 +190,9 @@ mod tests {
                 None
             );
             assert_eq!(engine.process_timed_event((Event::ID0, 12)), None);
-            let events = engine.process_timed_event((Event::ID1, 14));
+            let events = engine.process_timed_event((Event::ID1, 14)).unwrap();
             assert_eq!(
-                events.unwrap()[Event::ID0.bits() as usize],
+                events.chord[Event::ID0.bits() as usize],
                 EventChord {
                     start_at: 10,
                     end_at: 12
@@ -201,7 +200,7 @@ mod tests {
                 "ID 0"
             );
             assert_eq!(
-                events.unwrap()[Event::ID1.bits() as usize],
+                events.chord[Event::ID1.bits() as usize],
                 EventChord {
                     start_at: 11,
                     end_at: 14

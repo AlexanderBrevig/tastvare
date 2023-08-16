@@ -24,40 +24,14 @@ mod tests {
 
     mod no_mod_layer {
 
-        use crate::protocol::{Event, EventChord, Events, EVENTS_LEN};
+        use crate::protocol::{Event, EventChord, Events};
 
-        struct FluidEvent<'a> {
-            events: &'a mut Events,
-        }
-        impl<'a> FluidEvent<'a> {
-            fn press(&mut self, e: Event) -> &mut FluidEvent<'a> {
-                self.events[e.intersection(Event::ID_MASK).bits() as usize].start_at = 10;
-                self
-            }
-            fn release(&mut self, e: Event) -> &mut FluidEvent<'a> {
-                self.events[e.intersection(Event::ID_MASK).bits() as usize].end_at = 20;
-                self
-            }
-        }
         #[test]
         fn home_row() {
-            let mut chords = [EventChord {
-                start_at: 0,
-                end_at: 0,
-            }; EVENTS_LEN];
-            let mut events = FluidEvent {
-                events: &mut chords,
-            };
-            //TODO: make an API kind of along these lines
-            // let chord = 2;
-            // let key = match chord {
-            //     0b01000000 => Keyboard::A,
-            //     0b0111111100001101 => Keyboard::Keyboard7,
-            //     _ => Keyboard::NoEventIndicated,
-            // };
-            events.press(Event::ID1).release(Event::ID1);
+            let mut events = Events::new();
+            events.press(Event::ID1, 10).release(Event::ID1, 20);
             assert_eq!(
-                events.events[Event::ID1.bits() as usize],
+                events.chord[Event::ID1.bits() as usize],
                 EventChord {
                     start_at: 10,
                     end_at: 20

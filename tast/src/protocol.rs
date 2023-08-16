@@ -40,29 +40,41 @@ pub struct EventChord {
 
 // We have 6 ID slots and thus support a max of 2⁶ = 64 unique key IDs
 pub const EVENTS_LEN: usize = 64;
-pub type Events = [EventChord; EVENTS_LEN];
+
+#[derive(Debug, PartialEq)]
+pub struct Events {
+    pub chord: [EventChord; EVENTS_LEN],
+}
+
+impl Events {
+    pub fn press(&mut self, e: Event, time: EventTime) -> &mut Events {
+        self.chord[e.intersection(Event::ID_MASK).bits() as usize].start_at = time;
+        self
+    }
+
+    pub fn release(&mut self, e: Event, time: EventTime) -> &mut Events {
+        self.chord[e.intersection(Event::ID_MASK).bits() as usize].end_at = time;
+        self
+    }
+
+    #[cfg(test)]
+    pub(crate) fn new() -> Events {
+        Events {
+            chord: [EventChord {
+                start_at: 0,
+                end_at: 0,
+            }; EVENTS_LEN],
+        }
+    }
+
+    pub(crate) fn is_before(&self, lhs: Event, rhs: Event) -> bool {
+        self.chord[lhs.bits() as usize].start_at > self.chord[rhs.bits() as usize].start_at
+    }
+}
 
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    pub struct FluidEvent<'a> {
-        pub events: &'a mut Events,
-    }
-    impl<'a> FluidEvent<'a> {
-        pub fn press(&mut self, e: Event, time: EventTime) -> &mut FluidEvent<'a> {
-            self.events[e.intersection(Event::ID_MASK).bits() as usize].start_at = time;
-            self
-        }
-
-        pub fn release(&mut self, e: Event, time: EventTime) -> &mut FluidEvent<'a> {
-            self.events[e.intersection(Event::ID_MASK).bits() as usize].end_at = time;
-            self
-        }
-
-        pub(crate) fn new(chords: &'a mut [EventChord; EVENTS_LEN]) -> FluidEvent<'a> {
-            FluidEvent { events: chords }
-        }
-    }
     #[test]
     fn sanity_check_event_api() {
         let id0_id1 = Event::ID0 | Event::ID1;
@@ -77,20 +89,14 @@ pub mod tests {
     #[cfg(test)]
     mod fluid_event {
         use super::*;
-        use crate::protocol::{tests::FluidEvent, EventChord};
+        use crate::protocol::EventChord;
 
         #[test]
         fn home_row() {
-            let mut chords = [EventChord {
-                start_at: 0,
-                end_at: 0,
-            }; EVENTS_LEN];
-            let mut events = FluidEvent {
-                events: &mut chords,
-            };
+            let mut events = Events::new();
             events.press(Event::ID1, 10).release(Event::ID1, 20);
             assert_eq!(
-                events.events[Event::ID1.bits() as usize],
+                events.chord[Event::ID1.bits() as usize],
                 EventChord {
                     start_at: 10,
                     end_at: 20

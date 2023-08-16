@@ -87,6 +87,16 @@ fn main() -> ! {
     // Top down design
     let keymap = Tinykeys {};
 
+    #[cfg(feature = "microkeys")] // HACK: not really right...
+    let _use_six = layout::six::microkeys::microkeys(
+        pins.gpio5.into_pull_up_input(),
+        pins.gpio6.into_pull_up_input(),
+        pins.gpio7.into_pull_up_input(),
+        pins.gpio18.into_pull_up_input(),
+        pins.gpio19.into_pull_up_input(),
+        pins.gpio20.into_pull_up_input(),
+    );
+
     #[cfg(feature = "left")]
     let layout = layout::twelve::tinykeys::left(
         pins.gpio5.into_pull_up_input(),

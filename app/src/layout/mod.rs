@@ -3,6 +3,7 @@ use embedded_hal::digital::v2::InputPin;
 use rp2040_hal::gpio::{Pin, PinId, PinMode, PullUpInput, ValidPinMode};
 use tast::protocol::EventTime;
 
+pub mod six;
 pub mod thirtyfour;
 pub mod twelve;
 
