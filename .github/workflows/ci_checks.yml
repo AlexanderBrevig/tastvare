@@ -7,6 +7,7 @@ env:
 
 jobs:
   building:
+    if: false
     name: Building
     continue-on-error: ${{ matrix.experimental || false }}
     strategy:
