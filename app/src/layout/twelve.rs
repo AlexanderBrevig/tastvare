@@ -40,17 +40,35 @@ where
 {
     fn get_event(&mut self) -> Option<TimedEvent> {
         if let Ok(true) = self.pinky.did_change() {
-            event_from(PINKY, self.pinky.pressed).map(|e| (e, self.pinky.changed_at_ms))
+            Some((
+                event_from(PINKY, self.pinky.pressed),
+                self.pinky.changed_at_ms,
+            ))
         } else if let Ok(true) = self.ring.did_change() {
-            event_from(RING, self.ring.pressed).map(|e| (e, self.ring.changed_at_ms))
+            Some((
+                event_from(RING, self.ring.pressed), // force line
+                self.ring.changed_at_ms,
+            ))
         } else if let Ok(true) = self.middle.did_change() {
-            event_from(MIDDLE, self.middle.pressed).map(|e| (e, self.middle.changed_at_ms))
+            Some((
+                event_from(MIDDLE, self.middle.pressed),
+                self.middle.changed_at_ms,
+            ))
         } else if let Ok(true) = self.index.did_change() {
-            event_from(INDEX, self.index.pressed).map(|e| (e, self.index.changed_at_ms))
+            Some((
+                event_from(INDEX, self.index.pressed),
+                self.index.changed_at_ms,
+            ))
         } else if let Ok(true) = self.thumb1.did_change() {
-            event_from(THUMB1, self.thumb1.pressed).map(|e| (e, self.thumb1.changed_at_ms))
+            Some((
+                event_from(THUMB1, self.thumb1.pressed),
+                self.thumb1.changed_at_ms,
+            ))
         } else if let Ok(true) = self.thumb2.did_change() {
-            event_from(THUMB2, self.thumb2.pressed).map(|e| (e, self.thumb2.changed_at_ms))
+            Some((
+                event_from(THUMB2, self.thumb2.pressed),
+                self.thumb2.changed_at_ms,
+            ))
         } else {
             None
         }

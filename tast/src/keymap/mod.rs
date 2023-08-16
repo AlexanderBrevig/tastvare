@@ -2,6 +2,7 @@ use usbd_human_interface_device::page::Keyboard;
 
 use crate::protocol::Events;
 
+pub mod microkeys;
 pub mod tinykeys;
 
 pub trait Keymap<const KEYBOARD_REPORT_SIZE: usize> {

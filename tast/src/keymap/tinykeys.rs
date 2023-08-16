@@ -24,7 +24,7 @@ mod tests {
 
     mod no_mod_layer {
 
-        use crate::protocol::{Event, EventChord, Events};
+        use crate::protocol::{Event, EventChord, Events, EVENTS_LEN};
 
         struct FluidEvent<'a> {
             events: &'a mut Events,
@@ -44,7 +44,7 @@ mod tests {
             let mut chords = [EventChord {
                 start_at: 0,
                 end_at: 0,
-            }; 64];
+            }; EVENTS_LEN];
             let mut events = FluidEvent {
                 events: &mut chords,
             };

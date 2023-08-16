@@ -1,7 +1,7 @@
 use crate::{
     keymap::Keymap,
     layout::Layout,
-    protocol::{Event, EventChord, EventTime, Events, TimedEvent},
+    protocol::{Event, EventChord, EventTime, Events, TimedEvent, EVENTS_LEN},
     report::UsbReporter,
     serial::EventSource,
 };
@@ -14,7 +14,7 @@ where
     USB: UsbReporter,
     ES: EventSource,
 {
-    event_log: [(Event, EventTime); 64],
+    event_log: [(Event, EventTime); EVENTS_LEN],
     current_ix: usize,
     layout: L,
     keymap: K,
@@ -55,7 +55,7 @@ where
         if event.0.contains(Event::IMMEDIATE) {
             // IMMEDIATE events are not journaled to the event_log
             let ix = (event.0 & Event::ID_MASK).bits() as usize;
-            let mut chords = [EventChord::default(); 64];
+            let mut chords = [EventChord::default(); EVENTS_LEN];
             chords[ix].start_at = event.1;
             chords[ix].end_at = event.1;
             Some(chords)
@@ -63,7 +63,7 @@ where
             // Register event to log
             self.event_log[self.current_ix] = event;
             self.current_ix += 1;
-            self.current_ix %= 64; //TODO: refactor magic number
+            self.current_ix %= EVENTS_LEN;
 
             // Check if log is balanced
             let mut presses = 0;
@@ -78,7 +78,7 @@ where
             }
 
             if presses <= 0 {
-                let mut chords = [EventChord::default(); 64];
+                let mut chords = [EventChord::default(); EVENTS_LEN];
                 for (evnt, time) in self.event_log {
                     let ix = (evnt & Event::ID_MASK).bits() as usize;
                     if evnt.contains(Event::PRESSED) {
@@ -98,7 +98,7 @@ where
     pub fn new(layout: L, keymap: K, report: USB, serial: ES) -> Self {
         Self {
             current_ix: 0,
-            event_log: [(Event::NONE, 0); 64],
+            event_log: [(Event::NONE, 0); EVENTS_LEN],
             layout,
             keymap,
             report,
@@ -118,10 +118,10 @@ mod tests {
     };
     fn engine(
         event: Option<TimedEvent>,
-        events: Option<[Keyboard; 64]>,
-    ) -> Engine<64, TestLayout, TestKeymap, TestUsbReporter, TestEventSource> {
+        events: Option<[Keyboard; EVENTS_LEN]>,
+    ) -> Engine<EVENTS_LEN, TestLayout, TestKeymap, TestUsbReporter, TestEventSource> {
         Engine {
-            event_log: [(Event::NONE, 0); 64],
+            event_log: [(Event::NONE, 0); EVENTS_LEN],
             current_ix: 0,
             layout: TestLayout { event },
             keymap: TestKeymap { events },
