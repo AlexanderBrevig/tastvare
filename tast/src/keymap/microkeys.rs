@@ -11,7 +11,6 @@ pub struct Microkeys {}
 
 impl Microkeys {}
 
-//TODO: move this or handle dyn size
 pub const KEYBOARD_REPORT_SIZE: usize = 6;
 impl Keymap<KEYBOARD_REPORT_SIZE> for Microkeys {
     fn generate_report(
@@ -24,9 +23,16 @@ impl Keymap<KEYBOARD_REPORT_SIZE> for Microkeys {
             return Some(keys);
         }
         let events = events.unwrap();
+
+        // We get a u8 corresponding to reverse order
+        // This is because we assigned Left Shift (left most key)
+        // to ID0, which is least significant and rightmost bit
+        // in a literal.
         let mut id = events.get_id() as u8;
 
-        // Rotate 1011 to 1101
+        // For simplicity I want to match a literal 0b100000 for left shift
+        // and 0b000001 for right shift
+        // Because of this, we rotate 1011 to 1101
         let mut val: u8 = 0;
         let mut rev: u8 = 0;
         while val < 8 {
@@ -37,8 +43,13 @@ impl Keymap<KEYBOARD_REPORT_SIZE> for Microkeys {
             val += 1;
         }
         id = rev;
+        // Now, since we rotated the entire 8 bits, we got from
+        // 0b00000001 to 0b10000000
+        // But we want 0b100000 so we shift twice right
         id >>= 2;
 
+        // Finally we can match on bit patterns that correspond visually to
+        // actual keys pressed while maintaining the natural feel of left shift being ID0
         let handled = match id {
             0b010000 => variant_lookup(variant, Keyboard::A).map(|k| keys[0] = k),
             0b011000 if events.is_before(LLEFT, LRIGHT) => {
