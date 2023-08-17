@@ -1,5 +1,5 @@
 use crate::{
-    keymap::Keymap,
+    keymap::{Keymap, KeymapVariant},
     layout::Layout,
     protocol::{self, Event, EventChord, EventTime, Events, TimedEvent, EVENTS_LEN},
     report::UsbReporter,
@@ -20,6 +20,7 @@ where
     keymap: K,
     serial: ES,
     report: USB,
+    variant: KeymapVariant,
 }
 
 impl<const KRS: usize, L, K, USB, ES> Engine<KRS, L, K, USB, ES>
@@ -36,14 +37,14 @@ where
         //TODO: place in a Tastvare::App
         while let Some(timed_event) = self.serial.get_event() {
             let event = self.process_timed_event(timed_event);
-            let report = self.keymap.generate_report(event);
+            let report = self.keymap.generate_report(event, self.variant);
             self.report.write_report(report).ok();
         }
 
         while let Some(timed_event) = self.layout.get_event() {
             self.serial.send_event(timed_event.0);
             let event = self.process_timed_event(timed_event);
-            let report = self.keymap.generate_report(event);
+            let report = self.keymap.generate_report(event, self.variant);
             self.report.write_report(report).ok();
         }
         self.report.tick().ok();
@@ -94,7 +95,7 @@ where
         }
     }
 
-    pub fn new(layout: L, keymap: K, report: USB, serial: ES) -> Self {
+    pub fn new(layout: L, keymap: K, report: USB, serial: ES, variant: KeymapVariant) -> Self {
         Self {
             current_ix: 0,
             event_log: [(Event::NONE, 0); EVENTS_LEN],
@@ -102,6 +103,7 @@ where
             keymap,
             report,
             serial,
+            variant,
         }
     }
 }
@@ -112,8 +114,11 @@ mod tests {
 
     use super::*;
     use crate::{
-        keymap::tests::TestKeymap, layout::tests::TestLayout, protocol::Event,
-        report::tests::TestUsbReporter, serial::tests::TestEventSource,
+        keymap::{qwerty::QWERTY, tests::TestKeymap},
+        layout::tests::TestLayout,
+        protocol::Event,
+        report::tests::TestUsbReporter,
+        serial::tests::TestEventSource,
     };
     fn engine(
         event: Option<TimedEvent>,
@@ -123,9 +128,13 @@ mod tests {
             event_log: [(Event::NONE, 0); EVENTS_LEN],
             current_ix: 0,
             layout: TestLayout { event },
-            keymap: TestKeymap { events },
+            keymap: TestKeymap {
+                events,
+                input: Keyboard::A,
+            },
             serial: TestEventSource { event },
             report: TestUsbReporter { result: Ok(()) },
+            variant: QWERTY,
         }
     }
     mod process_timed_event {

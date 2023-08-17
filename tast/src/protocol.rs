@@ -56,6 +56,15 @@ impl Events {
         self.chord[e.intersection(Event::ID_MASK).bits() as usize].end_at = time;
         self
     }
+    pub fn get_id(&self) -> u64 {
+        let mut id: u64 = 0;
+        for (ix, evt) in self.chord.iter().enumerate() {
+            if evt.start_at != 0 {
+                id |= ix as u64;
+            }
+        }
+        id
+    }
 
     #[cfg(test)]
     pub(crate) fn new() -> Events {
@@ -87,6 +96,71 @@ pub mod tests {
     }
 
     #[cfg(test)]
+    mod events_id {
+
+        use crate::protocol::{Event, EventChord, Events};
+
+        #[test]
+        fn test_none() {
+            let events = Events::new();
+            assert_eq!(events.get_id(), 0);
+        }
+        #[test]
+        fn test_zero() {
+            let mut events = Events::new();
+            events.chord[Event::ID0.bits() as usize] = EventChord {
+                start_at: 10,
+                end_at: 20,
+            };
+            assert_eq!(events.get_id(), 0b1);
+        }
+        #[test]
+        fn test_one() {
+            let mut events = Events::new();
+            events.chord[Event::ID1.bits() as usize] = EventChord {
+                start_at: 10,
+                end_at: 20,
+            };
+            assert_eq!(events.get_id(), 0b10);
+        }
+        #[test]
+        fn test_two() {
+            let mut events = Events::new();
+            events.chord[Event::ID2.bits() as usize] = EventChord {
+                start_at: 10,
+                end_at: 20,
+            };
+            assert_eq!(events.get_id(), 0b100);
+        }
+        #[test]
+        fn test_three() {
+            let mut events = Events::new();
+            events.chord[Event::ID3.bits() as usize] = EventChord {
+                start_at: 10,
+                end_at: 20,
+            };
+            assert_eq!(events.get_id(), 0b1000);
+        }
+        #[test]
+        fn test_one_two_three() {
+            let mut events = Events::new();
+            events.chord[Event::ID1.bits() as usize] = EventChord {
+                start_at: 10,
+                end_at: 20,
+            };
+            events.chord[Event::ID2.bits() as usize] = EventChord {
+                start_at: 10,
+                end_at: 20,
+            };
+            events.chord[Event::ID3.bits() as usize] = EventChord {
+                start_at: 10,
+                end_at: 20,
+            };
+            assert_eq!(events.get_id(), 0b1110);
+        }
+    }
+
+    #[cfg(test)]
     mod fluid_event {
         use super::*;
         use crate::protocol::EventChord;
@@ -108,6 +182,7 @@ pub mod tests {
     #[cfg(test)]
     mod modify_pressed {
         use super::*;
+
         #[test]
         fn sixbysix_pass_through_not_pressed() {
             let e = Event::ID0;
