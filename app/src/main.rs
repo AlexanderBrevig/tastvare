@@ -11,6 +11,7 @@ compile_error!("Must be either left or right");
 
 mod layout;
 mod light;
+mod matrix;
 mod serial;
 mod usb;
 
@@ -20,6 +21,7 @@ use defmt_rtt as _;
 
 use fugit::{ExtU32, RateExtU32};
 use panic_probe as _;
+use rp2040_hal::gpio::DynPin;
 use rp2040_hal::usb::UsbBus;
 use serial::Serial;
 
@@ -32,6 +34,8 @@ use rp2040_hal::{
     watchdog::Watchdog,
     Clock, Sio,
 };
+use tast::keymap::ergonomisk::Ergonomisk;
+use tast::keymap::qwerty::QWERTY;
 use tast::keymap::tinykeys::Tinykeys;
 use usb_device::class_prelude::UsbBusAllocator;
 use usb_device::prelude::UsbDeviceBuilder;
@@ -41,6 +45,7 @@ use usbd_human_interface_device::usb_class::UsbHidClassBuilder;
 
 // USB
 
+use crate::matrix::Matrix;
 use crate::usb::Usb;
 use tast::engine::Engine;
 
@@ -85,8 +90,8 @@ fn main() -> ! {
     );
 
     // Top down design
-    let keymap = Tinykeys {};
-
+    // let keymap = Tinykeys {};
+    let keymap = Ergonomisk {};
     #[cfg(feature = "microkeys")] // HACK: not really right...
     let _use_six = layout::six::microkeys::microkeys(
         pins.gpio5.into_pull_up_input(),
@@ -97,6 +102,7 @@ fn main() -> ! {
         pins.gpio20.into_pull_up_input(),
     );
 
+    /*
     #[cfg(feature = "left")]
     let layout = layout::twelve::tinykeys::left(
         pins.gpio5.into_pull_up_input(),
@@ -116,6 +122,7 @@ fn main() -> ! {
         pins.gpio9.into_pull_up_input(),
         pins.gpio10.into_pull_up_input(),
     );
+    */
 
     //USB
     let usb_bus = UsbBusAllocator::new(UsbBus::new(
@@ -153,7 +160,26 @@ fn main() -> ! {
         rx: &mut rx,
     };
 
-    let mut engine = Engine::new(layout, keymap, usb, serial);
+    let matrix: Matrix<DynPin, DynPin, 6, 3> = Matrix::new(
+        [
+            pins.gpio19.into_pull_up_input().into(),
+            pins.gpio20.into_pull_up_input().into(),
+            pins.gpio21.into_pull_up_input().into(),
+            pins.gpio22.into_pull_up_input().into(),
+            pins.gpio23.into_pull_up_input().into(),
+            pins.gpio24.into_pull_up_input().into(),
+        ],
+        [
+            pins.gpio7.into_push_pull_output().into(),
+            pins.gpio6.into_push_pull_output().into(),
+            pins.gpio5.into_push_pull_output().into(),
+        ],
+    )
+    .unwrap();
+
+    let layout = layout::thirtyfour::ergonomisk::new(matrix);
+
+    let mut engine = Engine::new(layout, keymap, usb, serial, QWERTY);
 
     // MAIN LOOP
     let timer = rp2040_hal::Timer::new(pac.TIMER, &mut pac.RESETS); //, &clocks);

@@ -5,6 +5,7 @@ use crate::protocol::Events;
 pub const KEYMAP_VARIANT_LENGTH: usize = 26;
 
 pub mod colemak;
+pub mod ergonomisk;
 pub mod microkeys;
 pub mod qwerty;
 pub mod tinykeys;
